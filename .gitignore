@@ -1,0 +1,18 @@
+# project
+_site
+.sass-cache
+.vagrant
+
+# general
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+Gemfile.lock
+
+beautiful-jekyll-theme-*.gem
+
+_posts/sample/sample1.md
+_posts/sample/sample2.md
+
+git_toolbox_prj.xml

@@ -1,0 +1,159 @@
+---
+layout: base
+---
+
+{% include header.html type="post" %}
+
+<div class="{% if page.full-width %} container-fluid {% else %} container-md {% endif %}">
+    <div class="row">
+        <div class="{% if page.full-width %} col {% else %} col-xl-8 offset-xl-2 col-lg-10 offset-lg-1 {% endif %}">
+
+            {% if page.gh-repo %}
+            {% assign gh_split = page.gh-repo | split:'/' %}
+            {% assign gh_user = gh_split[0] %}
+            {% assign gh_repo = gh_split[1] %}
+
+            <div id="header-gh-btns">
+                {% if page.gh-badge.size > 0 %}
+                {% for badge in page.gh-badge %}
+                {% case badge %}
+                {% when 'star'%}
+                <iframe src="https://ghbtns.com/github-btn.html?user={{ gh_user }}&repo={{ gh_repo }}&type=star&count=true"
+                        frameborder="0" scrolling="0" width="120px" height="20px"></iframe>
+                {% when 'watch'%}
+                <iframe src="https://ghbtns.com/github-btn.html?user={{ gh_user }}&repo={{ gh_repo }}&type=watch&v=2&count=true"
+                        frameborder="0" scrolling="0" width="120px" height="20px"></iframe>
+                {% when 'fork'%}
+                <iframe src="https://ghbtns.com/github-btn.html?user={{ gh_user }}&repo={{ gh_repo }}&type=fork&count=true"
+                        frameborder="0" scrolling="0" width="120px" height="20px"></iframe>
+                {% when 'follow'%}
+                <iframe src="https://ghbtns.com/github-btn.html?user={{ gh_user }}&type=follow&count=true"
+                        frameborder="0" scrolling="0" width="220px" height="20px"></iframe>
+                {% endcase %}
+                {% endfor %}
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if page.before-content %}
+            <div class="before-content">
+                {% for file in page.before-content %}
+                {% include {{ file }} %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <article role="main" class="blog-post">
+                <aside class="sidebar__right sticky" style="height: auto !important;">
+                    <div class="toc">
+                        <a href="#">&gt; 맨 위로 </a>
+                        {% include toc.html html=content sanitize=true h_min=1 h_max=2 %}
+                    </div>
+                </aside>
+                {{ content }}
+            </article>
+
+            {% if page.tags.size > 0 %}
+            <div class="blog-tags">
+                <span>Tags:</span>
+                {% for tag in page.tags %}
+                <a href="{{ '/tags' | relative_url }}#{{- tag -}}">{{- tag -}}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if page.after-content %}
+            <div class="after-content">
+                {% for file in page.after-content %}
+                {% include {{ file }} %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if page.social-share %}
+            {% include social-share.html %}
+            {% endif %}
+
+            <ul class="pagination blog-pager">
+                {% if page.previous.url %}
+                <li class="page-item previous">
+                    <a class="page-link" href="{{ page.previous.url | relative_url }}"
+                       data-toggle="tooltip" data-placement="top"
+                       title="{{page.previous.title | strip_html | xml_escape}}">&larr; Previous
+                        Post</a>
+                </li>
+                {% endif %}
+                {% if page.next.url %}
+                <li class="page-item next">
+                    <a class="page-link" href="{{ page.next.url | relative_url }}"
+                       data-toggle="tooltip" data-placement="top"
+                       title="{{page.next.title | strip_html | xml_escape}}">Next Post &rarr;</a>
+                </li>
+                {% endif %}
+            </ul>
+            {% include comments.html %}
+        </div>
+    </div>
+</div>
+<script>
+    function getTOCNodes(master) {
+        var nodes = Array.prototype.slice.call(master.getElementsByTagName("*"), 0);
+        var tocNodes = nodes.filter(function(elem) {
+            return elem.tagName == "A";
+        });
+        return tocNodes;
+    }
+    function getHeaderNodes(master) {
+        var nodes = Array.prototype.slice.call(master.getElementsByTagName("*"), 0);
+        var headerNodes = nodes.filter(function(elem) {
+            return elem.tagName == "H1" || elem.tagName == "H2" || elem.tagName == "H3" || elem.tagName == "H4" || elem.tagName == "H5" || elem.tagName == "H6";
+        });
+        return headerNodes;
+    }
+
+    var article = document.getElementsByClassName("blog-post")[0];
+    var articleY = window.pageYOffset + article.getBoundingClientRect().top;
+
+    var toc = document.getElementsByClassName("toc")[0];
+
+    var headerNodes = getHeaderNodes(article);
+    var tocNodes = getTOCNodes(toc);
+
+    var before = undefined;
+
+    document.addEventListener('scroll', function(e) {
+        var current = headerNodes.filter(function(header) {
+            var headerY = window.pageYOffset + header.getBoundingClientRect().top;
+            return window.scrollY >= headerY - 60;
+        });
+
+        if (current.length > 0) {
+            current = current[current.length-1];
+
+            var currentA = tocNodes.filter(function(tocNode) {
+                return tocNode.innerHTML == current.innerHTML;
+            })
+
+            currentA = currentA[0];
+            if (currentA) {
+                if (before == undefined) before = currentA;
+
+                if (before != currentA) {
+                    before.classList.remove("toc-active");
+                    before = currentA;
+                }
+
+                currentA.classList.add("toc-active");
+            }
+            else {
+                if (before)
+                    before.classList.remove("toc-active");
+            }
+        }
+        else {
+            if (before)
+                before.classList.remove("toc-active");
+        }
+
+    }, false);
+</script>
